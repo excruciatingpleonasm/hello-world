@@ -1,0 +1,75 @@
+import requests
+from bs4 import BeautifulSoup
+
+URL = 'https://spec.drom.ru'
+
+
+def get_html(url):
+    r = requests.get(url)
+    return r.text
+
+
+def get_user_data(href,category):
+    html = get_html(URL + href)
+    soup = BeautifulSoup(html, 'lxml')
+    category_ad = category[-1]
+    reference_item = URL + href
+    general = soup.find('span', class_='userNick').find('a')
+    user_reference = general.get('href')
+    id_user = general.text
+    region = soup.find('a','egie0z71').text.split('}')[-1]
+    try:
+        name = (BeautifulSoup(get_html(URL + user_reference), 'lxml').find('span', 'userNick').text).strip()
+    except:
+        name = ''
+    data = {'reference_item':reference_item,
+            'region':region,
+            'id_user':id_user,
+            'user_reference':user_reference,
+            'name':name,
+            'category': category_ad
+            }
+    print(data)
+
+
+def get_page(url,category):
+    html = get_html(url)
+    soup = BeautifulSoup(html, 'lxml')
+    previous_url = url
+    amount = int(soup.find('strong').text.split()[0])
+    for i in range(amount + 1):
+        url += f'?page={i}'
+        soup = BeautifulSoup(get_html(url), 'lxml')
+        users = soup.find_all('a', class_='bulletinLink')
+        for user in users:
+            get_user_data(user.get('href'),category)
+        url = previous_url
+
+
+def writer_csv(data):
+    pass
+
+
+def get_categories_spec():
+    new = []
+    html = get_html(URL + '/primorskii-krai/')
+    soup = BeautifulSoup(html, 'lxml')
+    categories = soup.find('div', class_='treeSelectControl').find_all('a', class_='option')
+    for category in categories:
+        if 'услуг' in category.text or 'запчас' in category.text:
+            continue
+        new.append([category.get('href').split('/')[-2], category.text])
+    return new
+
+
+def main():
+    url = 'https://spec.drom.ru/'
+    categories = get_categories_spec()
+    for category in categories:
+        for i in range(6):
+            url = (requests.get(f'https://spec.drom.ru/set/city/{i}?return=%2F')).url + f'/{category[0]}/'
+            get_page(url,category)
+
+
+if __name__ == '__main__':
+    main()
