@@ -63,12 +63,14 @@ def get_categories_spec():
 
 
 def main():
-    url = 'https://spec.drom.ru/'
     categories = get_categories_spec()
     for category in categories:
+        # Iterating through cities
         for i in range(6):
-            url = (requests.get(f'https://spec.drom.ru/set/city/{i}?return=%2F')).url + f'/{category[0]}/'
+            # Getting specific city's specific url and gathering page's information
+            url = (requests.get(f'https://spec.drom.ru/set/city/{i}?return=%2F')).url + f'/{category[0]}/' 
             get_page(url,category)
+           
 
 
 if __name__ == '__main__':
