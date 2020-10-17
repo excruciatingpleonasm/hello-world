@@ -1,7 +1,3 @@
-Readme_solution
+First parser project of mine
 
-Hello World
-
-Hello anything
-
-A darkness which encounter out world
+It isn't completed, however functioning
